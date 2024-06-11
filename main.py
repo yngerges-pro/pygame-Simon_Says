@@ -20,7 +20,7 @@ class main:
         self.BLUE_ON = (0, 0, 255)
         self.BLUE_OFF = (0, 0, 150)
         self.YELLOW_ON = (255, 255, 0)
-        self.YELLOW_OFF = (227, 227, 0)
+        self.YELLOW_OFF = (255, 227, 0)
         # Pass in respective sounds for each color
         self.GREEN_SOUND = pygame.mixer.Sound("bell1.mp3") # bell1
         self.RED_SOUND = pygame.mixer.Sound("bell2.mp3") # bell2
@@ -34,8 +34,8 @@ class main:
 
         self.colors = ["green","red","blue", "yellow"]
 
-        self.__cpu_sequence = []
-        self.__players_sequence = []
+        self.cpu_sequence = []
+        self.players_sequence = []
         '''
         Draws game board
         '''
@@ -62,7 +62,7 @@ class main:
     def cpu_turn(self):
         choice = str(random.choice(self.colors)) # pick random color
         print("The choice is", choice)
-        self.__cpu_sequence.append(choice) # update cpu sequence
+        self.cpu_sequence.append(choice) # update cpu sequence
         if choice == "green":
             self.green.update(self.SCREEN)
         elif choice == "red":
@@ -75,14 +75,14 @@ class main:
             print("Wrong Color")
         # Check other three color options
 
-        print(self.__cpu_sequence)
+        print(self.cpu_sequence)
         '''
         Plays pattern sequence that is being tracked by cpu_sequence
     '''
 
     def repeat_cpu_sequence(self):
-        if(len(self.__cpu_sequence) != 0):
-            for color in self.__cpu_sequence:
+        if(len(self.cpu_sequence) != 0):
+            for color in self.cpu_sequence:
                 if color == "green":
                     self.green.update(self.SCREEN)
                 elif color == "red":
@@ -114,7 +114,7 @@ class main:
     
     def player_turn(self):
         turn_time = time.time()
-        while time.time() <= turn_time + 3 and len(self.__players_sequence) <= len(self.__cpu_sequence):
+        while time.time() <= turn_time + 3 and len(self.players_sequence) <= len(self.cpu_sequence):
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
 
@@ -124,35 +124,37 @@ class main:
                     
                     if self.green.selected(pos): # green button was selected
                         self.green.update(self.SCREEN) # illuminate button
-                        self.__players_sequence.append("green") # add to player
+                        self.players_sequence.append("green") # add to player
+                        self.check_sequence(self.cpu_sequence,self.players_sequence) # check if player choice was correct
                     elif self.red.selected(pos): # red button was selected
                         self.red.update(self.SCREEN) # illuminate button
-                        self.__players_sequence.append("red") # add to player
+                        self.players_sequence.append("red") # add to player
+                        self.check_sequence(self.cpu_sequence,self.players_sequence) # check if player choice was correct
                     elif self.yellow.selected(pos): # yellow button was selected
                         self.yellow.update(self.SCREEN) # illuminate button
-                        self.__players_sequence.append("yellow") # add to player
+                        self.players_sequence.append("yellow") # add to player
+                        self.check_sequence(self.cpu_sequence,self.players_sequence) # check if player choice was correct
                     elif self.blue.selected(pos): # blue button was selected
                         self.blue.update(self.SCREEN) # illuminate button
-                        self.__players_sequence.append("blue") # add to player
-
-                    print("player's list", self.__players_sequence)
-                    mobj = main()
-                    mobj.check_sequence(self.__players_sequence) # check if player
-                        # choice was correct
+                        self.players_sequence.append("blue") # add to player
+                        self.check_sequence(self.cpu_sequence,self.players_sequence) # check if player choice was correct
+       
+                    print("player's list", self.players_sequence)
+                    # self.check_sequence() # check if player choice was correct
                     turn_time = time.time() # reset timer
         # Check other three options
         # If player does not select a button within 3 seconds then the game
         # closes
         if not time.time() <= turn_time + 3:
             mobj = main()
-            mobj.check_sequence(self.__players_sequence)
+            mobj.check_sequence(self.cpu_sequence,self.players_sequence)
 
     '''
     Checks if player's move matches the cpu pattern sequence
     '''
 
-    def check_sequence(self, players_sequence):
-        if self.__players_sequence[:len(self.__players_sequence)] != self.__cpu_sequence[:len(self.__players_sequence)]:
+    def check_sequence(self, cpu_sequence, players_sequence):
+        if players_sequence[0] != cpu_sequence[0]:
             pygame.quit()
             quit()
 
